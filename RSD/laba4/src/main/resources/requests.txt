@@ -1,0 +1,44 @@
+Добавление питомца (POST):
+$body = @{
+    name = "Doggie"
+    category = @{
+        name = "Dogs"
+    }
+    status = "available"
+} | ConvertTo-Json
+
+$headers = @{
+    "Content-Type" = "application/json"
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/v3/pet" `
+                  -Method POST `
+                  -Headers $headers `
+                  -Body $body
+
+Получение питомца по ID (GET):
+Invoke-WebRequest -Uri "http://localhost:8080/api/v3/pet/1" `
+                  -Method GET
+
+Обновление питомца (PUT):
+$body = @{
+    id = 1
+    name = "New Doggie"
+    category = @{
+        name = "Dogs"
+    }
+    status = "sold"
+} | ConvertTo-Json
+
+$headers = @{
+    "Content-Type" = "application/json"
+}
+
+Invoke-WebRequest -Uri "http://localhost:8080/api/v3/pet" `
+                  -Method PUT `
+                  -Headers $headers `
+                  -Body $body
+
+Удаление питомца (DELETE):
+Invoke-WebRequest -Uri "http://localhost:8080/api/v3/pet/1" `
+                  -Method DELETE
