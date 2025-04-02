@@ -1,0 +1,262 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1
+      author: vlad
+      runAlways: true
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: customer
+      changes:
+        - createTable:
+            tableName: customer
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: street
+                  type: VARCHAR(255)
+              - column:
+                  name: zipcode
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: 2
+      author: vlad
+      runAlways: true
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: item
+      changes:
+        - createTable:
+            tableName: item
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: shipping_weight_value
+                  type: DECIMAL
+              - column:
+                  name: measurement_name
+                  type: VARCHAR(255)
+              - column:
+                  name: description
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: 3
+      author: vlad
+      runAlways: true
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: orders
+        - tableExists:
+            tableName: customer
+      changes:
+        - createTable:
+            tableName: orders
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: date
+                  type: TIMESTAMP
+              - column:
+                  name: status
+                  type: VARCHAR(255)
+              - column:
+                  name: customer_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_orders_customer
+                    references: customer(id)
+
+  - changeSet:
+      id: 4
+      author: vlad
+      runAlways: true
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: order_detail
+        - tableExists:
+            tableName: orders
+        - tableExists:
+            tableName: item
+      changes:
+        - createTable:
+            tableName: order_detail
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: quantity_value
+                  type: INTEGER
+              - column:
+                  name: measurement_name
+                  type: VARCHAR(255)
+              - column:
+                  name: tax_status
+                  type: VARCHAR(255)
+              - column:
+                  name: order_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_order_detail_order
+                    references: orders(id)
+              - column:
+                  name: item_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_order_detail_item
+                    references: item(id)
+
+  - changeSet:
+      id: 5
+      author: vlad
+      runAlways: true
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: payment
+        - tableExists:
+            tableName: orders
+      changes:
+        - createTable:
+            tableName: payment
+            columns:
+              - column:
+                  name: id
+                  type: BIGSERIAL
+                  autoIncrement: true
+                  constraints:
+                    primaryKey: true
+              - column:
+                  name: amount
+                  type: FLOAT
+              - column:
+                  name: order_id
+                  type: BIGINT
+                  constraints:
+                    nullable: false
+                    foreignKeyName: fk_payment_order
+                    references: orders(id)
+              - column:
+                  name: type
+                  type: VARCHAR(50)
+
+  - changeSet:
+      id: 6
+      author: vlad
+      runAlways: true
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: cash
+        - tableExists:
+            tableName: payment
+      changes:
+        - createTable:
+            tableName: cash
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    foreignKeyName: fk_cash_payment
+                    references: payment(id)
+              - column:
+                  name: cash_tendered
+                  type: FLOAT
+
+  - changeSet:
+      id: 7
+      author: vlad
+      runAlways: true
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: check
+        - tableExists:
+            tableName: payment
+      changes:
+        - createTable:
+            tableName: check
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    foreignKeyName: fk_check_payment
+                    references: payment(id)
+              - column:
+                  name: name
+                  type: VARCHAR(255)
+              - column:
+                  name: bank_id
+                  type: VARCHAR(255)
+
+  - changeSet:
+      id: 8
+      author: vlad
+      runAlways: true
+      preConditions:
+        - onFail: MARK_RAN
+        - not:
+            - tableExists:
+                tableName: credit
+        - tableExists:
+            tableName: payment
+      changes:
+        - createTable:
+            tableName: credit
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  constraints:
+                    primaryKey: true
+                    foreignKeyName: fk_credit_payment
+                    references: payment(id)
+              - column:
+                  name: number
+                  type: VARCHAR(255)
+              - column:
+                  name: type
+                  type: VARCHAR(255)
+              - column:
+                  name: exp_date
+                  type: DATE
